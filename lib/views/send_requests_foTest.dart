@@ -47,19 +47,20 @@ class SendRequestsPage extends StatelessWidget {
       final List<RequestModel> dummyRequests = List.generate(
         20,
         (index) => RequestModel(
-          id: 'request_${index + 1}', // Unique ID for each request
-          time: DateTime.now().subtract(Duration(hours: index)), // Use DateTime
-          destination: 'Location ${index + 1}',
-          carSize: ['Small', 'Medium', 'Large'][index % 3], // Random car size
-          carStatus: [
-            'Broken Engine',
-            'Flat Tire',
-            'Dead Battery'
-          ][index % 3], // Random car status
-          servicePricing: '0', // Initial price
-          placeOfLoading: 'Loading Point ${index + 1}',
-          providerId: _controller.providerId, // Use the provider's unique ID
-        ),
+            id: 'request_${index + 1}', // Unique ID for each request
+            time:
+                DateTime.now().subtract(Duration(hours: index)), // Use DateTime
+            destination: 'Location ${index + 1}',
+            carSize: ['Small', 'Medium', 'Large'][index % 3], // Random car size
+            carStatus: [
+              'Broken Engine',
+              'Flat Tire',
+              'Dead Battery'
+            ][index % 3], // Random car status
+            servicePricing: '0', // Initial price
+            placeOfLoading: 'Loading Point ${index + 1}',
+            providerId: _controller.providerId, // Use the provider's unique ID
+            status: 'accomplished'),
       );
 
       // Send each request to Firestore

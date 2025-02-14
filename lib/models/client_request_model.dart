@@ -1,12 +1,13 @@
 class RequestModel {
-  final String id; // Change to String for Firestore document ID
-  final DateTime time; // Changed to DateTime
+  final String id;
+  final DateTime time;
   final String destination;
   final String carSize;
   final String carStatus;
   String servicePricing;
   final String placeOfLoading;
-  final String providerId; // Unique provider ID
+  final String providerId;
+  final String status; // field مهم
 
   RequestModel({
     required this.id,
@@ -17,9 +18,9 @@ class RequestModel {
     required this.servicePricing,
     required this.placeOfLoading,
     required this.providerId,
+    required this.status,
   });
 
-  // Convert RequestModel to a Map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -30,21 +31,21 @@ class RequestModel {
       'servicePricing': servicePricing,
       'placeOfLoading': placeOfLoading,
       'providerId': providerId,
+      'status': status, // Add this field
     };
   }
 
-  // Create a RequestModel from a Firestore document
   factory RequestModel.fromMap(Map<String, dynamic> data) {
     return RequestModel(
       id: data['id'],
       time: data['time'].toDate(),
-      // Convert Firestore Timestamp to DateTime // Convert Firestore Timestamp to DateTime
       destination: data['destination'],
       carSize: data['carSize'],
       carStatus: data['carStatus'],
       servicePricing: data['servicePricing'],
       placeOfLoading: data['placeOfLoading'],
       providerId: data['providerId'],
+      status: data['status'], // Add this field
     );
   }
 }

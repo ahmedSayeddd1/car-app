@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:first_project/models/client_request_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProviderController extends GetxController {
@@ -10,23 +11,33 @@ class ProviderController extends GetxController {
 
   // List of requests (now fetched from Firestore)
   final RxList<RequestModel> _serviceRequests = <RequestModel>[].obs;
+  final RxBool _isLoading = false.obs;
+  final RxList<RequestModel> _accomplishedOrders = <RequestModel>[].obs;
 
   // Provider availability status
   final RxBool _isAvailable = true.obs;
   //   Track visible requests
   final int _batchSize = 10;
   var _visibleRequests = 10.obs;
+  final RxString selectedLanguage = 'en'.obs;
 
   // Getters
   List<RequestModel> get serviceRequests => _serviceRequests;
   int get visibleRequests => _visibleRequests.value;
   bool get isAvailable => _isAvailable.value;
+  List<RequestModel> get accomplishedOrders => _accomplishedOrders;
+
+  bool get isLoading => _isLoading.value;
+
+  void changeLanguage(String languageCode) {
+    selectedLanguage.value = languageCode;
+    Get.updateLocale(Locale(languageCode)); // Update the app locale
+  }
 
   // Load requests from Firestore
   Future<void> loadRequests() async {
+    _isLoading.value = true;
     try {
-      print(
-          '==============Loading requests for provider: $providerId'); // Debug log
       final querySnapshot = await _firestore
           .collection('requests')
           .where('providerId', isEqualTo: "123456789")
@@ -36,9 +47,6 @@ class ProviderController extends GetxController {
       // .where('providerId', isEqualTo: providerId)
       // .orderBy('time', descending: true) // Sort by latest first
 
-      print(
-          '==========================Number of requests fetched: ${querySnapshot.docs.length}'); // Debug log
-
       _serviceRequests.assignAll(
         querySnapshot.docs.map((doc) {
           print(
@@ -46,8 +54,38 @@ class ProviderController extends GetxController {
           return RequestModel.fromMap(doc.data());
         }).toList(),
       );
+      if (_visibleRequests.value > _serviceRequests.length) {
+        _visibleRequests.value = _serviceRequests.length;
+      } else {
+        _visibleRequests.value = 10;
+      }
     } catch (e) {
       Get.snackbar('Error', 'Failed to load requests: $e');
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+/////////////////////////////////////////////////////
+// Fetch accomplished orders
+  Future<void> fetchAccomplishedOrders() async {
+    _isLoading.value = true;
+    try {
+      final querySnapshot = await _firestore
+          .collection('requests')
+          .where('providerId', isEqualTo: providerId)
+          .where('status', isEqualTo: 'accomplished') // Filter by status
+          .get();
+
+      _accomplishedOrders.assignAll(
+        querySnapshot.docs
+            .map((doc) => RequestModel.fromMap(doc.data()))
+            .toList(),
+      );
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch accomplished orders: $e');
+    } finally {
+      _isLoading.value = false;
     }
   }
 
@@ -76,7 +114,13 @@ class ProviderController extends GetxController {
   Future<void> hideRequest(String requestId) async {
     try {
       await _firestore.collection('requests').doc(requestId).delete();
+      // مسحنا من الفايربيز
+      // _serviceRequests.removeWhere((request) => request.id == requestId);
+      // كده اتاكدت اني مسحت برضو من الليست هنا
       await loadRequests(); // Refresh the list
+      if (_visibleRequests.value > _serviceRequests.length) {
+        _visibleRequests.value = _serviceRequests.length;
+      } // هنا باكد قيمة الفيزيبل ريكويستس عشان ال item count of the listview.builder
       Get.snackbar('Request Hidden', 'Request has been hidden');
     } catch (e) {
       Get.snackbar('Error', 'Failed to hide request: $e');
@@ -85,6 +129,19 @@ class ProviderController extends GetxController {
 
   // Send an offer (update request in Firestore)
   Future<void> sendOffer(String requestId, String price) async {
+    // Validate service pricing
+    if (price.isEmpty ||
+        double.tryParse(price) == null ||
+        double.parse(price) <= 0) {
+      Get.snackbar(
+        'Invalid Price',
+        'Please enter a valid price greater than zero.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 3),
+      );
+      return; // Exit the method if validation fails
+    }
+
     try {
       await _firestore.collection('requests').doc(requestId).update({
         'servicePricing': price,
