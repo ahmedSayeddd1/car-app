@@ -60,8 +60,7 @@ class SendRequestsPage extends StatelessWidget {
             servicePricing: '0', // Initial price
             placeOfLoading: 'Loading Point ${index + 1}',
             providerId: _controller.providerId, // Use the provider's unique ID
-            status: 'accomplished',
-            hiddenByProvider: false),
+            status: 'accomplished'),
       );
 
       // Send each request to Firestore

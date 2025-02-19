@@ -8,66 +8,45 @@ class ProviderOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  Scaffold(
       body: Column(
         children: [
-          // Filter Section with RadioButtons
+          // Header Section
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    'filter_by'.tr, // Translated label
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'my_orders'.tr,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _controller.fetchAccomplishedOrders();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: buttonColor,
+                    //const Color.fromARGB(255, 172, 62, 54), // Custom button color
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // Rounded corners
                     ),
                   ),
-                  // RadioButton for Accomplished Orders
-                  Row(
-                    children: [
-                      Obx(() => Radio<String>(
-                            value: 'accomplished',
-                            groupValue: _controller.selectedFilter,
-                            onChanged: (value) {
-                              _controller.updateFilter(value!);
-                            },
-                          )),
-                      Text('accomplished'.tr),
-                    ],
+                  child: Text(
+                    'show_my_orders'.tr,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                  // RadioButton for Under Implementation Orders
-                  Row(
-                    children: [
-                      Obx(() => Radio<String>(
-                            value: 'under_implementation',
-                            groupValue: _controller.selectedFilter,
-                            onChanged: (value) {
-                              _controller.updateFilter(value!);
-                            },
-                          )),
-                      Text('under_implementation'.tr),
-                    ],
-                  ),
-                  // RadioButton for Rejected Orders
-                  Row(
-                    children: [
-                      Obx(() => Radio<String>(
-                            value: 'rejected',
-                            groupValue: _controller.selectedFilter,
-                            onChanged: (value) {
-                              _controller.updateFilter(value!);
-                            },
-                          )),
-                      Text('rejected'.tr),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const Divider(
@@ -80,8 +59,7 @@ class ProviderOrders extends StatelessWidget {
               return const Expanded(
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: Color.fromARGB(
-                        255, 172, 62, 54), // Custom loading color
+                    color: Color.fromARGB(255, 172, 62, 54), // Custom loading color
                   ),
                 ),
               );
@@ -104,13 +82,11 @@ class ProviderOrders extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final order = _controller.accomplishedOrders[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Card(
                         elevation: 4, // Add shadow for depth
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(10), // Rounded corners
+                          borderRadius: BorderRadius.circular(10), // Rounded corners
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.all(16),
@@ -126,13 +102,12 @@ class ProviderOrders extends StatelessWidget {
                             children: [
                               const SizedBox(height: 8), // Spacing
                               Text('${'time'.tr}: ${order.time}'),
-                              Text(
-                                  '${'destination'.tr}: ${order.destination.tr}'),
+                              Text('${'destination'.tr}: ${order.destination.tr}'),
                               Text('${'car_size'.tr}: ${order.carSize.tr}'),
                               Text(
                                 '${'status'.tr}: ${order.status.tr}',
                                 style: TextStyle(
-                                  color: order.status == 'accomplished'
+                                  color: order.status == 'Completed'
                                       ? Colors.green
                                       : Colors.orange, // Dynamic status color
                                   fontWeight: FontWeight.bold,

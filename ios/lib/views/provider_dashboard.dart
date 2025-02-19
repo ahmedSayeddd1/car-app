@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProviderDashboard extends StatelessWidget {
+
   final ProviderController _controller =
-      Get.put(ProviderController(providerId: '123456789'), permanent: true);
+      Get.put(ProviderController(providerId: '123456789'),permanent: true);
 
   final RxInt _selectedIndex =
       0.obs; // Track the selected index for bottom navigation
@@ -20,16 +21,18 @@ class ProviderDashboard extends StatelessWidget {
         actions: [
           Row(
             children: [
-              // Text(_controller.isAvailable ? "status_available".tr : "status_busy".tr),
-              GetBuilder<ProviderController>(builder: (_) {
-                return Switch(
-                  value: _controller.isAvailable,
-                  onChanged: (value) => _controller.toggleAvailability(),
-                  activeColor: _controller.toogleColor,
-                  //Colors.green,
-                  inactiveThumbColor: Colors.red,
-                );
-              }),
+             // Text(_controller.isAvailable ? "status_available".tr : "status_busy".tr),
+              GetBuilder<ProviderController>(
+                builder: (_) {
+                  return Switch(
+                    value: _controller.isAvailable,
+                    onChanged: (value) => _controller.toggleAvailability(),
+                    activeColor:_controller.toogleColor,
+                    //Colors.green,
+                    inactiveThumbColor: Colors.red,
+                  );
+                }
+              ),
             ],
           ),
 
@@ -89,7 +92,7 @@ class ProviderDashboard extends StatelessWidget {
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.assignment_turned_in),
-                label: 'orders'.tr,
+                label: 'accomplished_orders'.tr,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.settings),

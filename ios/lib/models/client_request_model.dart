@@ -8,19 +8,18 @@ class RequestModel {
   final String placeOfLoading;
   final String providerId;
   final String status; // field مهم
-  final bool hiddenByProvider; // New field
 
-  RequestModel(
-      {required this.id,
-      required this.time,
-      required this.destination,
-      required this.carSize,
-      required this.carStatus,
-      required this.servicePricing,
-      required this.placeOfLoading,
-      required this.providerId,
-      required this.status,
-      this.hiddenByProvider = false});
+  RequestModel({
+    required this.id,
+    required this.time,
+    required this.destination,
+    required this.carSize,
+    required this.carStatus,
+    required this.servicePricing,
+    required this.placeOfLoading,
+    required this.providerId,
+    required this.status,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -33,7 +32,6 @@ class RequestModel {
       'placeOfLoading': placeOfLoading,
       'providerId': providerId,
       'status': status, // Add this field
-      'hiddenByProvider': hiddenByProvider, // Add this field
     };
   }
 
@@ -48,8 +46,6 @@ class RequestModel {
       placeOfLoading: data['placeOfLoading'],
       providerId: data['providerId'],
       status: data['status'], // Add this field
-      hiddenByProvider:
-          data['hiddenByProvider'] ?? false, // Default to false if null
     );
   }
 }

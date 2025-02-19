@@ -29,13 +29,6 @@ class ProviderController extends GetxController {
 
   bool get isLoading => _isLoading.value;
 
-  @override
-  void onInit() {
-    // TODO: implement onInit
-    super.onInit();
-    fetchOrders();
-  }
-
   void changeLanguage(String languageCode) {
     selectedLanguage.value = languageCode;
     Get.updateLocale(Locale(languageCode)); // Update the app locale
@@ -48,7 +41,6 @@ class ProviderController extends GetxController {
       final querySnapshot = await _firestore
           .collection('requests')
           .where('providerId', isEqualTo: "123456789")
-          .where('hiddenByProvider', isEqualTo: false) // Exclude hidden orders
           // .orderBy('time', descending: true)
           // للاسف مش شغال معايا -_0
           .get();
@@ -121,10 +113,7 @@ class ProviderController extends GetxController {
   // Hide a request (delete from Firestore)
   Future<void> hideRequest(String requestId) async {
     try {
-      await _firestore
-          .collection('requests')
-          .doc(requestId)
-          .update({"hiddenByProvider": true});
+      await _firestore.collection('requests').doc(requestId).delete();
       // مسحنا من الفايربيز
       // _serviceRequests.removeWhere((request) => request.id == requestId);
       // كده اتاكدت اني مسحت برضو من الليست هنا
@@ -164,25 +153,27 @@ class ProviderController extends GetxController {
     }
   }
 
-  Color toogleColor = Colors.green;
+ Color toogleColor=Colors.green;
   // Toggle provider availability
   void toggleAvailability() {
     _isAvailable.value = !_isAvailable.value;
-    if (_isAvailable.value) {
-      toogleColor = Colors.green;
+    if(_isAvailable.value){
+      toogleColor=Colors.green;
       update();
-    } else {
-      toogleColor = Colors.red;
+    }else{
+
+      toogleColor=Colors.red;
       update();
     }
     Get.snackbar(
-      duration: const Duration(seconds: 1),
-      //  'Status Updated',
+      duration:const Duration(seconds: 1),
+    //  'Status Updated',
       _isAvailable.value ? 'You are now Available'.tr : 'You are now Busy'.tr,
       '',
       snackPosition: SnackPosition.TOP,
       backgroundColor: _isAvailable.value ? Colors.green : Colors.red,
       colorText: Colors.white,
+
     );
   }
 
@@ -192,40 +183,6 @@ class ProviderController extends GetxController {
       if (_visibleRequests.value > _serviceRequests.length) {
         _visibleRequests.value = _serviceRequests.length;
       }
-    }
-  }
-
-  final RxString _selectedFilter = 'accomplished'.obs;
-
-  // Getter for selected filter
-  String get selectedFilter => _selectedFilter.value;
-
-  // Method to update the filter
-  void updateFilter(String filter) {
-    _selectedFilter.value = filter;
-    fetchOrders(); // Fetch orders based on the new filter
-  }
-
-  // Updated method to fetch orders based on the selected filter
-  Future<void> fetchOrders() async {
-    _isLoading.value = true;
-    try {
-      final querySnapshot = await _firestore
-          .collection('requests')
-          .where('providerId', isEqualTo: providerId)
-          .where('status',
-              isEqualTo: _selectedFilter.value) // Filter by selected status
-          .get();
-
-      _accomplishedOrders.assignAll(
-        querySnapshot.docs
-            .map((doc) => RequestModel.fromMap(doc.data()))
-            .toList(),
-      );
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch orders: $e');
-    } finally {
-      _isLoading.value = false;
     }
   }
 

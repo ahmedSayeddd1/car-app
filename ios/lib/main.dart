@@ -7,7 +7,6 @@ import 'package:first_project/views/login_view.dart';
 import 'package:first_project/views/otp_view.dart';
 import 'package:first_project/views/provider_dashboard.dart';
 import 'package:first_project/views/send_requests_foTest.dart';
-import 'package:first_project/views/user%20views/nearest_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,9 +26,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: redTheme,
       title: "Car Fix App",
-      locale: const Locale('en'),
+      locale: const Locale('ar'),
       translations: AppTranslations(),
-      home: NearestProvidersPage(),
+      home: LoginPage(),
       //endRequestsPage(),
       getPages: [
         GetPage(name: '/HomeView', page: () => const HomeView()),
