@@ -2,12 +2,15 @@ import 'package:first_project/controllers/login_controller.dart';
 import 'package:first_project/values/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class LoginPage extends StatelessWidget {
   final LoginController _controller = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text('login'.tr),
@@ -16,7 +19,6 @@ class LoginPage extends StatelessWidget {
           DropdownButton<String>(
             iconEnabledColor: Colors.white,
             dropdownColor: primary,
-            //const Color.fromARGB(255, 172, 62, 54),
             iconDisabledColor: const Color.fromARGB(255, 180, 132, 129),
             value: _controller.selectedLanguage.value,
             onChanged: (String? newValue) {
@@ -34,153 +36,190 @@ class LoginPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Image.asset(
-              'assets/images/carLogo.webp',
-              //  'assets/images/carRepair-removebg-preview.png',
-              height: 250,
-            ),
-            const SizedBox(
-              height: 21,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment
-                  .start, // Align text and dropdown to the left
-              children: [
-                // Title Text
-                Text(
-                  'select your account type :'.tr,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(
-                    height: 16), // Reduced spacing for better hierarchy
+      body: 
+      
+     Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: ListView(
+    children: [
+      Image.asset(
+        'assets/images/carLogo.webp',
+        height: 170,
+      ),
+      const SizedBox(height: 21),
 
-                // Decorated Dropdown
-                Container(
-                  decoration: BoxDecoration(
-                      color: Colors.grey[
-                          100], // Background color of the dropdown container
-                      borderRadius:
-                          BorderRadius.circular(10)), // Rounded corners
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16), // Inner padding
-                  child: Obx(
-                    () => DropdownButton<String>(
-                      isExpanded: true, // Ensure the dropdown takes full width
-                      elevation: 8, // Shadow effect
-                      icon: const Icon(Icons.arrow_drop_down,
-                          color: Color.fromARGB(
-                              255, 172, 62, 54)), // Custom dropdown icon
-                      iconSize: 30, // Icon size
-                      iconEnabledColor:
-                          const Color.fromARGB(255, 172, 62, 54), // Icon color
-                      dropdownColor:
-                          Colors.white, // Background color of the dropdown menu
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black, // Text color
-                        fontWeight: FontWeight.w500,
-                      ),
-                      value: _controller.userType.value,
-                      onChanged: (String? newValue) {
-                        _controller.userType.value = newValue!;
-                      },
-                      items: <String>['User', 'Provider'].map((String value) {
-                        return DropdownMenuItem(
-                          value: value,
-                          child: Text(
-                            value.tr,
-                            style: const TextStyle(
-                              color:
-                                  Colors.black, // Text color in dropdown menu
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      hint: Text(
-                        'Select account type'
-                            .tr, // Hint text when no value is selected
-                        style: const TextStyle(
-                          color: Colors.grey, // Hint text color
-                        ),
-                      ),
-                      underline: Container(), // Remove the default underline
+      
+      Text(
+        'select your account type :'.tr,
+        style: const TextStyle(
+          fontSize: 18, // تكبير النص قليلاً
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const SizedBox(height: 10),
+
+      Obx(() => Column(
+            children: [
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: RadioListTile<String>(
+                  title: Text(
+                    'User'.tr,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Text(
-              'Enter your phone number'.tr,
-              style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            TextField(
-              controller: _controller.phoneController,
-              decoration: InputDecoration(
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                    color: Colors.black,
-                  )),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)),
-                  labelText: '+20',
-                  //'phoneNumber'.tr,
-                  labelStyle: const TextStyle(color: Colors.black),
-                  hintText: 'Enter your phone number'.tr,
-                  hintStyle:
-                      const TextStyle(color: Color.fromARGB(255, 172, 62, 54))),
-              keyboardType: TextInputType.phone,
-            ),
-            Obx(() => _controller.isCodeSent.value
-                ? TextField(
-                    controller: _controller.otpController,
-                    decoration: InputDecoration(
-                      labelText: 'otp'.tr,
-                      hintText: 'Enter OTP',
-                    ),
-                    keyboardType: TextInputType.number,
-                  )
-                : const SizedBox()),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.only(left: 28.0, right: 28),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
-                onPressed: () {
-                  //_controller.phoneNumberVerification;
-                  Get.offNamed('/OtpView');
-                },
-                child: Text(
-                  'sendOTP'.tr,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
+                  value: 'User',
+                  groupValue: _controller.userType.value,
+                  onChanged: (String? newValue) {
+                    _controller.userType.value = newValue!;
+
+                  },
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 20,
+              const SizedBox(height: 8),
+              Card(
+                elevation: 4, 
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: RadioListTile<String>(
+                  title: Text(
+                    'Provider'.tr,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  value: 'Provider',
+                  groupValue: _controller.userType.value,
+                  onChanged: (String? newValue) {
+                    _controller.userType.value = newValue!;
+                  },
+                ),
+              ),
+            ],
+          )),
+
+      const SizedBox(height: 30),
+
+   
+      Text(
+        'Enter your phone number'.tr,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const SizedBox(height: 8),
+
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              spreadRadius: 2,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
+        child: TextField(
+          controller: _controller.phoneController,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+                vertical: 14, horizontal: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            labelText: '+20',
+            hintText: 'Enter your phone number'.tr,
+          ),
+          keyboardType: TextInputType.phone,
+        ),
       ),
+
+      Obx(() => _controller.isCodeSent.value
+          ? Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _controller.otpController,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 14, horizontal: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: 'otp'.tr,
+                    hintText: 'Enter OTP',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            )
+          : const SizedBox()),
+
+      const SizedBox(height: 30),
+
+      // زر إرسال OTP
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: SizedBox(
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: buttonColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 4, // إضافة ظل للزر
+            ),
+            onPressed: () {
+                  final box=GetStorage();
+                  box.write('userType', _controller.userType.value);
+                  print("type==${_controller.userType.value}");
+                  Get.toNamed('/OtpView');
+            },
+            child: Text(
+              'sendOTP'.tr,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: 20),
+    ],
+  ),
+),
+
     );
   }
 }

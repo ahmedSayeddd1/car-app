@@ -1,6 +1,7 @@
 import 'package:first_project/controllers/provider_controller.dart';
-import 'package:first_project/widgets/dashboard_content.dart';
-import 'package:first_project/widgets/providers_orders.dart';
+import 'package:first_project/views/provider%20views/widgets/dashboard_content.dart';
+import 'package:first_project/views/provider%20views/widgets/notifications.dart';
+import 'package:first_project/views/provider%20views/widgets/providers_orders.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -74,6 +75,8 @@ class ProviderDashboard extends StatelessWidget {
           return DashboardContent(); // Show the dashboard content
         } else if (_selectedIndex.value == 1) {
           return ProviderOrders(); // Show the accomplished orders screen
+        } else if (_selectedIndex.value == 2) {
+          return NotificationsPage();
         } else {
           return const Placeholder(); // Placeholder for the third tab
         }
@@ -90,6 +93,10 @@ class ProviderDashboard extends StatelessWidget {
               BottomNavigationBarItem(
                 icon: const Icon(Icons.assignment_turned_in),
                 label: 'orders'.tr,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications),
+                label: 'Notifications'.tr,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.settings),

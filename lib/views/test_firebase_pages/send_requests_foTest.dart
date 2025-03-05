@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 // Adjust the import path
 // Adjust the import path
 
-class SendRequestsPage extends StatelessWidget {
+class TestRequestsPage extends StatelessWidget {
   final ProviderController _controller = Get.put(ProviderController(
       providerId: '123456789')); // Get the existing ProviderController instance
 
@@ -60,7 +60,8 @@ class SendRequestsPage extends StatelessWidget {
             servicePricing: '0', // Initial price
             placeOfLoading: 'Loading Point ${index + 1}',
             providerId: _controller.providerId, // Use the provider's unique ID
-            status: 'accomplished'),
+            status: 'accomplished',
+            hiddenByProvider: false),
       );
 
       // Send each request to Firestore

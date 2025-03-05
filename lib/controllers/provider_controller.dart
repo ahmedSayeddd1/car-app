@@ -1,18 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:first_project/models/client_request_model.dart';
+import 'package:first_project/models/notification_model.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
 class ProviderController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String providerId; // Unique provider ID (set during login)
+  final String providerId;
+  final String? userId; // Unique provider ID (set during login)
 
-  ProviderController({required this.providerId});
+  ProviderController({required this.providerId, this.userId});
 
   // List of requests (now fetched from Firestore)
   final RxList<RequestModel> _serviceRequests = <RequestModel>[].obs;
   final RxBool _isLoading = false.obs;
   final RxList<RequestModel> _accomplishedOrders = <RequestModel>[].obs;
+
+  // Observable list of notifications
+  var notifications = <NotificationModel>[].obs;
 
   // Provider availability status
   final RxBool _isAvailable = true.obs;
@@ -34,6 +41,7 @@ class ProviderController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     fetchOrders();
+    fetchNotifications(); // Fetch notifications when the controller is initialized
   }
 
   void changeLanguage(String languageCode) {
@@ -244,6 +252,79 @@ class ProviderController extends GetxController {
       print('===========Firestore Test Error================');
       print('Error: $e'); // Debug log
       print('Stack Trace: $stackTrace'); // Debug log
+    }
+  }
+
+  void startLocationUpdates(String orderId) {
+    Geolocator.getPositionStream().listen((Position position) {
+      _firestore.collection('offers').doc(orderId).update({
+        'trackingLocation': GeoPoint(position.latitude, position.longitude),
+      });
+    });
+  }
+
+  Future<void> confirmOrder(String orderId) async {
+    try {
+      // 1. Update offer status
+      await _firestore.collection('offers').doc(orderId).update({
+        'status': 'confirmed',
+        'confirmedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Mark the notification as read
+      await _firestore.collection('notifications').doc(orderId).update({
+        'read': true,
+      });
+
+      // 2. Set provider as busy
+      toggleAvailability();
+
+      // 3. Send notification to client
+      await _firestore.collection('notifications').add({
+        'type': 'confirmation',
+        'orderId': orderId,
+        'message': 'Provider has confirmed your order',
+        'userId': userId,
+        'providerId': providerId,
+        'timestamp': FieldValue.serverTimestamp(),
+        'read': false,
+      });
+      // Refresh notifications
+      fetchNotifications();
+
+      // 4. Start location tracking
+      startLocationUpdates(orderId);
+    } catch (e) {
+      Get.snackbar('Error', 'Confirmation failed: $e');
+    }
+  }
+
+  ////////////
+  // Fetch notifications from Firestore
+  Future<void> fetchNotifications() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('notifications')
+          .where('providerId', isEqualTo: providerId)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      notifications.value = querySnapshot.docs
+          .map((doc) => NotificationModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch notifications: $e');
+    }
+  }
+
+  Future<void> saveFCMToken(String providerId) async {
+    final FirebaseMessaging messaging = FirebaseMessaging.instance;
+    final String? token = await messaging.getToken();
+
+    if (token != null) {
+      await _firestore.collection('providers').doc(providerId).update({
+        'fcmToken': token,
+      });
     }
   }
 }

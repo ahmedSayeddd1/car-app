@@ -1,8 +1,11 @@
 import 'package:first_project/controllers/login_controller.dart';
 import 'package:first_project/values/colors.dart';
-import 'package:first_project/views/provider_dashboard.dart';
+import 'package:first_project/views/provider%20views/provider_dashboard.dart';
+import 'package:first_project/views/user%20views/main_user_page.dart';
+import 'package:first_project/views/user%20views/nearest_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class OtpView extends StatelessWidget {
   OtpView({super.key});
@@ -22,7 +25,7 @@ class OtpView extends StatelessWidget {
           children: [
             Text(
               'Enter the 4-digit OTP sent to your phone'.tr,
-              style: const TextStyle(fontSize: 16,fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 20),
             Row(
@@ -34,17 +37,23 @@ class OtpView extends StatelessWidget {
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(buttonColor),
               ),
-              onPressed:(){
-                Get.off( ProviderDashboard ());
-               // Get.offNamed('/HomeView');
-              } ,
-              //_controller.verifyOTP,
-              child:  Text('Verify OTP'.tr,
-                style: const TextStyle(fontWeight: FontWeight.w600,
-                    color:Colors.white
-                ),
-              ),
+              onPressed: () {
+                final box = GetStorage();
+                String userType = box.read('userType');
+                if (userType == 'User') {
+                  Get.off(MainUserPage());
+                } else {
+                  Get.off(ProviderDashboard());
+                }
 
+                // Get.offNamed('/HomeView');
+              },
+              //_controller.verifyOTP,
+              child: Text(
+                'Verify OTP'.tr,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, color: Colors.white),
+              ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -52,10 +61,10 @@ class OtpView extends StatelessWidget {
                 backgroundColor: WidgetStateProperty.all(buttonColor),
               ),
               onPressed: _controller.resendOTP,
-              child: Text('Resend OTP'.tr,
-              style: const TextStyle(fontWeight: FontWeight.w600,
-              color:Colors.white
-              ),
+              child: Text(
+                'Resend OTP'.tr,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, color: Colors.white),
               ),
             ),
           ],
