@@ -77,15 +77,18 @@ class OffersPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildActionButton('Accept'.tr, Colors.green,
-                          () => _controller.acceptOffer(offer, 'Accepted')),
+                      _buildActionButton(
+                          'Accept'.tr,
+                          Colors.green,
+                          () =>
+                              _controller.changeOfferStatus(offer, 'Accepted')),
                       _buildActionButton('Negotiate'.tr, Colors.orange,
                           () => _showNegotiationDialog(offer)),
                       _buildActionButton(
                           'Reject'.tr,
                           Colors.red,
                           () =>
-                              _controller.updateOfferStatus(offer, 'Rejected')),
+                              _controller.changeOfferStatus(offer, 'Rejected')),
                     ],
                   )
               ],

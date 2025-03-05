@@ -31,6 +31,7 @@ class ClientController extends GetxController {
       final querySnapshot = await _firestore
           .collection('offers')
           .where('userId', isEqualTo: userId)
+          .where('status', isNotEqualTo: 'Rejected')
           // .orderBy('timeOfOffer', descending: true)
           // مش عايز يتعمل الترتيب بالوقت للاسف
           .get();
@@ -44,12 +45,10 @@ class ClientController extends GetxController {
   }
 
   // Update status using Offer object
-  Future<void> updateOfferStatus(
-      ProviderOfferModel offer, String status) async {
+  Future<void> rejectOffer(ProviderOfferModel offer, String status) async {
     try {
       await _firestore.collection('offers').doc(offer.id).update({
         'status': status,
-        'acceptedAt': FieldValue.serverTimestamp(),
       });
       Get.snackbar('Success', 'Offer $status');
       fetchOffers();
@@ -102,11 +101,12 @@ class ClientController extends GetxController {
     }
   }
 
-  Future<void> acceptOffer(ProviderOfferModel offer, String status) async {
+  Future<void> changeOfferStatus(
+      ProviderOfferModel offer, String status) async {
     try {
       // Update the offer status to 'accepted'
       await _firestore.collection('offers').doc(offer.id).update({
-        'status': 'Accepted',
+        'status': status,
         'acceptedAt': FieldValue.serverTimestamp(),
       });
       fetchOffers();
@@ -131,7 +131,11 @@ class ClientController extends GetxController {
         await sendPushNotification(providerToken);
       }
 
-      Get.snackbar('Success', 'Offer accepted and provider notified');
+      if (status == 'Accepted') {
+        Get.snackbar('Success', 'Offer accepted and provider notified');
+      } else {
+        Get.snackbar('Success', 'Offer rejected and provider notified');
+      }
     } catch (e) {
       Get.snackbar('Error', 'Failed to accept offer: $e');
     }
