@@ -1,3 +1,4 @@
+import 'package:first_project/models/KSA_places.dart';
 import 'package:first_project/models/provider_model.dart';
 import 'package:first_project/values/colors.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,16 @@ class ProviderDetailsPage extends StatelessWidget {
   final _carSize = 'Small'.obs;
   final _malfunctionCause = 'Traffic Accident'.obs;
   final _isSubmitting = false.obs;
+
+  // For Location of Loading
+  final RxString _loadingRegion = ''.obs;
+  final RxString _loadingCity = ''.obs;
+  final RxString _loadingDistrict = ''.obs;
+
+// For Destination
+  final RxString _destinationRegion = ''.obs;
+  final RxString _destinationCity = ''.obs;
+  final RxString _destinationDistrict = ''.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +52,14 @@ class ProviderDetailsPage extends StatelessWidget {
               _buildMalfunctionCauseSelection(),
               const SizedBox(height: 16),
 
-              // Loading Location (Static Text)
+              // Location of Loading (Dropdowns)
               _buildSectionTitle('Location of Loading'.tr),
-              _buildStaticLocationText(),
+              _buildLocationDropdowns(),
               const SizedBox(height: 16),
 
-              // Destination (Static Text)
+              // Destination (Dropdowns)
               _buildSectionTitle('Destination'.tr),
-              _buildStaticDestinationText(),
+              _buildDestinationDropdowns(),
               const SizedBox(height: 24),
 
               // Submit Button
@@ -59,6 +70,160 @@ class ProviderDetailsPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildLocationDropdowns() {
+    return Column(
+      children: [
+        // Region Dropdown
+        Obx(() => DropdownButtonFormField<String>(
+              value: _loadingRegion.value.isEmpty ? null : _loadingRegion.value,
+              onChanged: (value) {
+                _loadingRegion.value = value!;
+                _loadingCity.value = ''; // Reset city when region changes
+                _loadingDistrict.value =
+                    ''; // Reset district when region changes
+              },
+              items: KSA.regions.keys.map((region) {
+                return DropdownMenuItem(
+                  value: region,
+                  child: Text(region),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                labelText: 'Region'.tr,
+                border: OutlineInputBorder(),
+              ),
+            )),
+        const SizedBox(height: 16),
+
+        // City Dropdown
+        Obx(() => DropdownButtonFormField<String>(
+              value: _loadingCity.value.isEmpty ? null : _loadingCity.value,
+              onChanged: (value) {
+                _loadingCity.value = value!;
+                _loadingDistrict.value = ''; // Reset district when city changes
+              },
+              items: _loadingRegion.value.isEmpty
+                  ? []
+                  : KSA.regions[_loadingRegion.value]!.keys.map((city) {
+                      return DropdownMenuItem(
+                        value: city,
+                        child: Text(city),
+                      );
+                    }).toList(),
+              decoration: InputDecoration(
+                labelText: 'City'.tr,
+                border: OutlineInputBorder(),
+              ),
+            )),
+        const SizedBox(height: 16),
+
+        // District Dropdown
+        Obx(() => DropdownButtonFormField<String>(
+              value: _loadingDistrict.value.isEmpty
+                  ? null
+                  : _loadingDistrict.value,
+              onChanged: (value) {
+                _loadingDistrict.value = value!;
+              },
+              items: _loadingCity.value.isEmpty
+                  ? []
+                  : KSA.regions[_loadingRegion.value]![_loadingCity.value]!
+                      .map((district) {
+                      return DropdownMenuItem(
+                        value: district,
+                        child: Text(district),
+                      );
+                    }).toList(),
+              decoration: InputDecoration(
+                labelText: 'District'.tr,
+                border: OutlineInputBorder(),
+              ),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildDestinationDropdowns() {
+    return Column(
+      children: [
+        // Region Dropdown
+        Obx(() => DropdownButtonFormField<String>(
+              value: _destinationRegion.value.isEmpty
+                  ? null
+                  : _destinationRegion.value,
+              onChanged: (value) {
+                _destinationRegion.value = value!;
+                _destinationCity.value = ''; // Reset city when region changes
+                _destinationDistrict.value =
+                    ''; // Reset district when region changes
+              },
+              items: KSA.regions.keys.map((region) {
+                return DropdownMenuItem(
+                  value: region,
+                  child: Text(region),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                labelText: 'Region'.tr,
+                border: OutlineInputBorder(),
+              ),
+            )),
+        const SizedBox(height: 16),
+
+        // City Dropdown
+        Obx(() => DropdownButtonFormField<String>(
+              value: _destinationCity.value.isEmpty
+                  ? null
+                  : _destinationCity.value,
+              onChanged: (value) {
+                _destinationCity.value = value!;
+                _destinationDistrict.value =
+                    ''; // Reset district when city changes
+              },
+              items: _destinationRegion.value.isEmpty
+                  ? []
+                  : KSA.regions[_destinationRegion.value]!.keys.map((city) {
+                      return DropdownMenuItem(
+                        value: city,
+                        child: Text(city),
+                      );
+                    }).toList(),
+              decoration: InputDecoration(
+                labelText: 'City'.tr,
+                border: OutlineInputBorder(),
+              ),
+            )),
+        const SizedBox(height: 16),
+
+        // District Dropdown
+        Obx(() => DropdownButtonFormField<String>(
+              value: _destinationDistrict.value.isEmpty
+                  ? null
+                  : _destinationDistrict.value,
+              onChanged: (value) {
+                _destinationDistrict.value = value!;
+              },
+              items: _destinationCity.value.isEmpty
+                  ? []
+                  : KSA.regions[_destinationRegion.value]![
+                          _destinationCity.value]!
+                      .map((district) {
+                      return DropdownMenuItem(
+                        value: district,
+                        child: Text(district),
+                      );
+                    }).toList(),
+              decoration: InputDecoration(
+                labelText: 'District'.tr,
+                border: OutlineInputBorder(),
+              ),
+            )),
+      ],
+    );
+  }
+
+  // Other methods (_buildProviderInfo, _buildCarSizeSelection, etc.) remain unchanged
 
   Widget _buildProviderInfo() {
     return Card(
@@ -210,7 +375,7 @@ class ProviderDetailsPage extends StatelessWidget {
             child: _isSubmitting.value
                 ? const CircularProgressIndicator(color: Colors.white)
                 : Text(
-                    'Accept Request'.tr,
+                    'Send Request'.tr,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,

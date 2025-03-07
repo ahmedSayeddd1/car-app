@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       title: "Car Fix App",
       locale: const Locale('ar'),
       translations: AppTranslations(),
-      home: TestOffersPage(),
+      home: LoginPage(),
       //NearestProvidersPage(),
       //endRequestsPage(),
       getPages: [

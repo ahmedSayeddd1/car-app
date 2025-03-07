@@ -4,6 +4,9 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en': {
+          'Region': 'Region',
+          'City': 'City',
+          'District': 'District',
           "You are now Busy": "You are now Busy",
           "You are now Available": "You are now Available",
           "Resend OTP": "Resend OTP",
@@ -81,7 +84,8 @@ class AppTranslations extends Translations {
           'Negotiate': 'Negotiate',
           'Reject': 'Reject',
           'Waiting for provider confirmation...':
-              'Waiting for provider confirmation...'
+              'Waiting for provider confirmation...',
+          'Send Request': 'Send Request'
         },
         'ar': {
           "Accept Request": "قبول الطلب",
@@ -164,9 +168,16 @@ class AppTranslations extends Translations {
           'Negotiate': 'تفاوض',
           'Reject': 'رفض',
           'Waiting for provider confirmation...':
-              'في انتظار تأكيد مقدم الخدمة ...'
+              'في انتظار تأكيد مقدم الخدمة ...',
+          'Send Request': 'إرسال الطلب',
+          'Region': 'المنطقة',
+          'City': 'المدينة',
+          'District': 'الحي',
         },
         'ur': {
+          'Region': 'علاقہ',
+          'City': 'شہر',
+          'District': 'ضلع',
           'login': 'لاگ ان',
           'phoneNumber': 'فون نمبر',
           'otp': 'ایک بار کا پاس ورڈ',
