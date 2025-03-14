@@ -82,6 +82,8 @@ class ProviderDashboard extends StatelessWidget {
         }
       }),
       bottomNavigationBar: Obx(() => BottomNavigationBar(
+            unselectedItemColor: Colors.grey,
+            selectedItemColor: Color(0xffFFAB40),
             currentIndex: _selectedIndex.value,
             onTap: (index) =>
                 _selectedIndex.value = index, // Update the selected index

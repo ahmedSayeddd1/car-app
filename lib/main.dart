@@ -7,10 +7,8 @@ import 'package:first_project/views/home_view.dart';
 import 'package:first_project/views/login_view.dart';
 import 'package:first_project/views/otp_view.dart';
 import 'package:first_project/views/provider%20views/provider_dashboard.dart';
-import 'package:first_project/views/test_firebase_pages/send_requests_foTest.dart';
-import 'package:first_project/views/test_firebase_pages/test_offers_page.dart';
 import 'package:first_project/views/user%20views/main_user_page.dart';
-import 'package:first_project/views/user%20views/nearest_providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -62,7 +60,14 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/HomeView', page: () => const HomeView()),
         GetPage(name: '/OtpView', page: () => OtpView()),
-        GetPage(name: '/ProviderDashboard', page: () => ProviderDashboard())
+        GetPage(
+          name: '/ProviderDashboard',
+          page: () => ProviderDashboard(),
+        ),
+        GetPage(
+          name: '/MainUserPage',
+          page: () => MainUserPage(),
+        )
       ],
     );
   }

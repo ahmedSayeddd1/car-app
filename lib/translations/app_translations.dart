@@ -85,7 +85,9 @@ class AppTranslations extends Translations {
           'Reject': 'Reject',
           'Waiting for provider confirmation...':
               'Waiting for provider confirmation...',
-          'Send Request': 'Send Request'
+          'Send Request': 'Send Request',
+          'No notifications found': 'No notifications found',
+          'Notifications': 'Notifications'
         },
         'ar': {
           "Accept Request": "قبول الطلب",
@@ -173,6 +175,8 @@ class AppTranslations extends Translations {
           'Region': 'المنطقة',
           'City': 'المدينة',
           'District': 'الحي',
+          'No notifications found': 'لا يوجد اشعارات جديدة',
+          'Notifications': 'إشعارات'
         },
         'ur': {
           'Region': 'علاقہ',

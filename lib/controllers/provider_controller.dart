@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'package:first_project/helper/calculate_distance.dart';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:first_project/models/client_request_model.dart';
 import 'package:first_project/models/notification_model.dart';
+import 'package:first_project/models/provider_offer_model.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -39,6 +43,7 @@ class ProviderController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
+    loadRequests();
     super.onInit();
     fetchOrders();
     fetchNotifications(); // Fetch notifications when the controller is initialized
@@ -77,6 +82,7 @@ class ProviderController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to load requests: $e');
+      print('============================================== $e');
     } finally {
       _isLoading.value = false;
     }
@@ -171,6 +177,7 @@ class ProviderController extends GetxController {
       Get.snackbar('Error', 'Failed to send offer: $e');
     }
   }
+  ////////////////////////////////////
 
   Color toogleColor = Colors.green;
   // Toggle provider availability
@@ -263,16 +270,16 @@ class ProviderController extends GetxController {
     });
   }
 
-  Future<void> confirmOrder(String orderId) async {
+  Future<void> confirmOrder(ProviderOfferModel offer) async {
     try {
       // 1. Update offer status
-      await _firestore.collection('offers').doc(orderId).update({
+      await _firestore.collection('offers').doc(offer.id).update({
         'status': 'confirmed',
         'confirmedAt': FieldValue.serverTimestamp(),
       });
 
       // Mark the notification as read
-      await _firestore.collection('notifications').doc(orderId).update({
+      await _firestore.collection('notifications').doc(offer.id).update({
         'read': true,
       });
 
@@ -282,20 +289,84 @@ class ProviderController extends GetxController {
       // 3. Send notification to client
       await _firestore.collection('notifications').add({
         'type': 'confirmation',
-        'orderId': orderId,
+        'orderId': offer.id,
         'message': 'Provider has confirmed your order',
-        'userId': userId,
-        'providerId': providerId,
+        'userId': offer.clientId,
+        'providerId': offer.providerId,
         'timestamp': FieldValue.serverTimestamp(),
         'read': false,
       });
+      final clientDoc =
+          await _firestore.collection('clients').doc(offer.clientId).get();
+      final clientToken = clientDoc.data()?['fcmToken'];
+      if (clientToken != null) {
+        await sendPushNotification(clientToken);
+      }
       // Refresh notifications
       fetchNotifications();
 
-      // 4. Start location tracking
-      startLocationUpdates(orderId);
+      // Calculate ETA
+      final request = await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(offer.id)
+          .get();
+      final clientId = request.data()!['clientId'];
+      final providerId = request.data()!['providerId'];
+
+      final clientLocation = await FirebaseFirestore.instance
+          .collection('clients')
+          .doc(clientId)
+          .get();
+      final providerLocation = await FirebaseFirestore.instance
+          .collection('providers')
+          .doc(providerId)
+          .get();
+
+      final double clientLat = clientLocation.data()!['location'].latitude;
+      final double clientLon = clientLocation.data()!['location'].longitude;
+      final double providerLat = providerLocation.data()!['location'].latitude;
+      final double providerLon = providerLocation.data()!['location'].longitude;
+
+      final double distance = calculateDistance(
+        clientLat,
+        clientLon,
+        providerLat,
+        providerLon,
+      );
+
+      final int eta = (distance * 2).round(); // 1 km = 2 minutes
     } catch (e) {
       Get.snackbar('Error', 'Confirmation failed: $e');
+    }
+  }
+
+  ///////////////////////////////
+  Future<void> sendPushNotification(String clientToken) async {
+    final url = Uri.parse('https://fcm.googleapis.com/fcm/send');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization':
+          'key=ServerKey-_-', //// محتاج هنا يا جووووووو السيرفر كيي>>>>>>>>>>>>
+    };
+    final body = {
+      'to': clientToken,
+      'notification': {
+        'title': 'New Order Accepted',
+        'body': 'A client has accepted your offer.',
+      },
+      'data': {
+        'orderId': 'order123', // Replace with actual order ID>>>>>>>>>>>>>
+        'type': 'order_accepted',
+      },
+    };
+
+    final response =
+        await http.post(url, headers: headers, body: jsonEncode(body));
+
+    if (response.statusCode == 200) {
+      print('Push notification sent successfully');
+    } else {
+      print('Failed to send push notification: ${response.body}');
     }
   }
 
@@ -325,6 +396,54 @@ class ProviderController extends GetxController {
       await _firestore.collection('providers').doc(providerId).update({
         'fcmToken': token,
       });
+    }
+  }
+
+  //////////////////////////////////
+  Future<void> sendOfferToClient({
+    required String requestId,
+    required String servicePricing,
+  }) async {
+    if (servicePricing.isEmpty ||
+        double.tryParse(servicePricing) == null ||
+        double.parse(servicePricing) <= 0) {
+      Get.snackbar(
+        'Invalid Price',
+        'Please enter a valid price greater than zero.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 3),
+      );
+      return; // Exit the method if validation fails
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .update({
+        'servicePricing': servicePricing,
+        'status': 'Offer Sent',
+      });
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to send offer: $e');
+    }
+
+    // Send a notification to the client
+    try {
+      final request = await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .get();
+      final clientId = request.data()!['clientId'];
+
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'userId': clientId,
+        'type': 'offer_received',
+        'message': 'You have received an offer from a provider.',
+        'timestamp': FieldValue.serverTimestamp(),
+        'read': false,
+      });
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to send notification to the client: $e');
     }
   }
 }

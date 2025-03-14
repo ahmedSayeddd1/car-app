@@ -77,7 +77,7 @@ class ClientController extends GetxController {
     final headers = {
       'Content-Type': 'application/json',
       'Authorization':
-          'key=YOUR_SERVER_KEY', // Replace with your Firebase Server Key
+          'key=ServerKey-_-', //// محتاج هنا يا جووووووو السيرفر كيي
     };
     final body = {
       'to': providerToken,
@@ -114,7 +114,7 @@ class ClientController extends GetxController {
       await _firestore.collection('notifications').add({
         'type': 'order_accepted',
         'orderId': offer.id,
-        'userId': offer.userId, // The client's ID
+        'userId': offer.clientId, // The client's ID
         'providerId': offer.providerId, // The provider's ID
         'timestamp': FieldValue.serverTimestamp(),
         'read': false,
@@ -139,5 +139,39 @@ class ClientController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', 'Failed to accept offer: $e');
     }
+  }
+
+//////////////////////////////////////////////////////////
+  Future<void> sendRequest({
+    required String clientId,
+    required String providerId,
+    required String carSize,
+    required String malfunctionCause,
+    required String loadingLocation,
+    required String destination,
+  }) async {
+    final requestId =
+        FirebaseFirestore.instance.collection('requests').doc().id;
+
+    await FirebaseFirestore.instance.collection('requests').doc(requestId).set({
+      'requestId': requestId,
+      'clientId': clientId,
+      'providerId': providerId,
+      'carSize': carSize,
+      'malfunctionCause': malfunctionCause,
+      'loadingLocation': loadingLocation,
+      'destination': destination,
+      'status': 'Pending',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    // Send a notification to the provider
+    await FirebaseFirestore.instance.collection('notifications').add({
+      'userId': providerId,
+      'type': 'new_request',
+      'message': 'You have a new request from a client.',
+      'timestamp': FieldValue.serverTimestamp(),
+      'read': false,
+    });
   }
 }

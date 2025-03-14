@@ -10,7 +10,6 @@ class NotificationsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Notifications'.tr)),
       body: Obx(() {
         if (_controller.notifications.isEmpty) {
           return Center(child: Text('No notifications found'.tr));
