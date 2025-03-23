@@ -47,14 +47,13 @@ void main() async {
   runApp(const MyApp());
 }
 
-
-
 void initializeNotificationChannel() {
   AwesomeNotifications().initialize(
     null, // Use null for default app icon
     [
       NotificationChannel(
-        channelKey: 'basic-channel2', // Match this key with the one used in createNotification
+        channelKey:
+            'basic-channel2', // Match this key with the one used in createNotification
         channelName: 'Basic Notifications',
         channelDescription: 'Notification channel for basic messages',
         importance: NotificationImportance.High,
@@ -92,7 +91,9 @@ class MyApp extends StatelessWidget {
 
 Future<void> configureFirebaseMessaging() async {
   print("NOTIF");
-  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) async {
+  FirebaseMessaging.instance
+      .getInitialMessage()
+      .then((RemoteMessage? message) async {
     if (message != null) {
       _handleNotification(message);
     }
@@ -111,11 +112,9 @@ Future<void> configureFirebaseMessaging() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
-
-
 void _handleNotification(RemoteMessage message) {
   final String? route = message.data['route'];
-  print("ROUTE==="+route.toString());
+  print("ROUTE===" + route.toString());
   // Pass route from the notification payload
   if (route != null) {
     // navigatorKey.currentState?.push(MaterialPageRoute(
@@ -141,9 +140,7 @@ triggerNotification(String msg) {
   );
 }
 
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-
   print('Handling a background message: ${message.notification?.title}');
   // Show a local notification or update the UI
 }
