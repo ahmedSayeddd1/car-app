@@ -1,4 +1,3 @@
-// models/provider_offer_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProviderOfferModel {
@@ -8,7 +7,7 @@ class ProviderOfferModel {
   final String providerName;
   final double distance;
   final String price;
-  final DateTime timeOfOffer;
+  final Timestamp timeOfOffer;
   final String status;
   final String carSize;
   final String placeOfLoading;
@@ -32,32 +31,67 @@ class ProviderOfferModel {
   factory ProviderOfferModel.fromSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
     return ProviderOfferModel(
-        id: snapshot.id,
-        providerId: data['providerId'] ?? '1',
-        userId: data['userId'],
-        providerName: data['providerName'],
-        distance: data['distance'].toDouble(),
-        price: data['price'],
-        timeOfOffer: (data['timeOfOffer'] as Timestamp).toDate(),
-        status: data['status'],
-        carSize: data['carSize'],
-        placeOfLoading: data['placeOfLoading'],
-        destination: data['destination']);
+      id: snapshot.id,
+      providerId: data['providerId'] ?? '1',
+      userId: data['userId']??"1",
+      providerName: data['providerName']??"",
+      distance: data['distance'].toDouble()??90,
+      price: data['price']??'90',
+      timeOfOffer: data['timeOfOffer']??Timestamp.now(),
+      status: data['status']??'Pending',
+      carSize: data['carSize']??'',
+      placeOfLoading: data['placeOfLoading']??"",
+      destination: data['destination']??"x",
+    );
+  }
+
+  // Factory method to create an Offer from a JSON map
+  factory ProviderOfferModel.fromJson(Map<String, dynamic> json) {
+    return ProviderOfferModel(
+      id: json['id'] ?? '', // Provide a default value if 'id' is not present
+      providerId: json['providerId'] ?? '1',
+      userId: json['userId']??"",
+      providerName: json['providerName']??"",
+      distance: json['distance'].toDouble()??90,
+      price: json['price']??"",
+      timeOfOffer: (json['timeOfOffer']??Timestamp.now()), // Parse ISO 8601 string
+      status: json['status']??"",
+      carSize: json['carSize']??'',
+      placeOfLoading: json['placeOfLoading']??"",
+      destination: json['destination']??"",
+    );
   }
 
   // Convert model to Map for Firestore operations
   Map<String, dynamic> toMap() {
     return {
+      'userId': userId??"",
+      'providerName': providerName??"",
+      'providerId': providerId??"",
+      'distance': distance??"",
+      'price': price??"",
+      //'timeOfOffer': Timestamp.fromDate(timeOfOffer),
+      'status': status??"",
+      'placeOfLoading': placeOfLoading??"",
+      'destination': destination??"",
+      'carSize': carSize??"",
+    };
+  }
+
+  // Convert model to JSON for API operations
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'providerId': providerId,
       'userId': userId,
       'providerName': providerName,
-      'providerId': providerId,
       'distance': distance,
       'price': price,
-      'timeOfOffer': Timestamp.fromDate(timeOfOffer),
+      'timeOfOffer': timeOfOffer, // Convert to ISO 8601 string
       'status': status,
+      'carSize': carSize,
       'placeOfLoading': placeOfLoading,
       'destination': destination,
-      'carSize': carSize
     };
   }
 }

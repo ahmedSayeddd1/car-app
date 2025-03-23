@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:first_project/helper/send_notification.dart';
+import 'package:first_project/main.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:first_project/models/provider_offer_model.dart';
@@ -27,10 +31,13 @@ class ClientController extends GetxController {
 
 // Fetch offers as objects
   Future<void> fetchOffers() async {
+
+    print("FETCH OFFFERRRSSS");
+
     try {
       final querySnapshot = await _firestore
           .collection('offers')
-          .where('userId', isEqualTo: userId)
+          .where('userId', isEqualTo: '1')
           .where('status', isNotEqualTo: 'Rejected')
           // .orderBy('timeOfOffer', descending: true)
           // مش عايز يتعمل الترتيب بالوقت للاسف
@@ -39,18 +46,24 @@ class ClientController extends GetxController {
       offers.value = querySnapshot.docs
           .map((doc) => ProviderOfferModel.fromSnapshot(doc))
           .toList();
+
+
+
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch offers: $e');
+      print("EEEE===$e");
     }
   }
 
   // Update status using Offer object
   Future<void> rejectOffer(ProviderOfferModel offer, String status) async {
+
     try {
       await _firestore.collection('offers').doc(offer.id).update({
         'status': status,
       });
       Get.snackbar('Success', 'Offer $status');
+
       fetchOffers();
     } catch (e) {
       Get.snackbar('Error', 'Failed to update offer status: $e');
@@ -60,12 +73,19 @@ class ClientController extends GetxController {
   // Negotiate price using Offer object
   Future<void> negotiateOfferPrice(
       ProviderOfferModel offer, String newPrice) async {
+    String? token = await FirebaseMessaging.instance.getToken();
     try {
       await _firestore.collection('offers').doc(offer.id).update({
         'price': int.parse(newPrice),
         'status': 'Negotiated',
       });
-      Get.snackbar('Success', 'Price updated to $newPrice SAR');
+      Get.snackbar('Success'.tr, "${'Price updated to'.tr}$newPrice" );
+
+      // NotificationService.sendNotification
+      //   (token!, 'تفاوض','تم ارسال طلب تفاوض ');
+
+      triggerNotification('تم ارسال طلب تفاوض');
+
       fetchOffers();
     } catch (e) {
       Get.snackbar('Error', 'Failed to negotiate: $e');
@@ -77,13 +97,14 @@ class ClientController extends GetxController {
     final headers = {
       'Content-Type': 'application/json',
       'Authorization':
-          'key=ServerKey-_-', //// محتاج هنا يا جووووووو السيرفر كيي
+          'key=YOUR_SERVER_KEY', // Replace with your Firebase Server Key
     };
     final body = {
       'to': providerToken,
       'notification': {
-        'title': 'New Order Accepted',
-        'body': 'A client has accepted your offer.',
+        'title': 'طلب جديد',
+        //'New Order Accepted',
+        'body': 'طلب جديد بانتظار الموافقة ',
       },
       'data': {
         'orderId': 'order123', // Replace with actual order ID
@@ -103,6 +124,8 @@ class ClientController extends GetxController {
 
   Future<void> changeOfferStatus(
       ProviderOfferModel offer, String status) async {
+
+    String? token = await FirebaseMessaging.instance.getToken();
     try {
       // Update the offer status to 'accepted'
       await _firestore.collection('offers').doc(offer.id).update({
@@ -114,7 +137,7 @@ class ClientController extends GetxController {
       await _firestore.collection('notifications').add({
         'type': 'order_accepted',
         'orderId': offer.id,
-        'userId': offer.clientId, // The client's ID
+        'userId': offer.userId, // The client's ID
         'providerId': offer.providerId, // The provider's ID
         'timestamp': FieldValue.serverTimestamp(),
         'read': false,
@@ -132,46 +155,70 @@ class ClientController extends GetxController {
       }
 
       if (status == 'Accepted') {
-        Get.snackbar('Success', 'Offer accepted and provider notified');
+
+        Get.snackbar('Success'.tr, 'Offer accepted and provider notified'.tr,
+        colorText:Colors.white,
+        backgroundColor:Colors.green,
+        );
+
+        triggerNotification('تمت الموافقة علي عرضك من قبل العميل ');
+
+
+        //
+        // NotificationService.sendNotification(token.toString()
+        //     , 'موافقة علي طلبك ', 'تمت الموافقة ');
+
       } else {
-        Get.snackbar('Success', 'Offer rejected and provider notified');
+        Get.snackbar('Success'.tr, 'Offer rejected and provider notified'.tr);
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to accept offer: $e');
     }
   }
 
-//////////////////////////////////////////////////////////
-  Future<void> sendRequest({
-    required String clientId,
+  Future<void> sendOrderToFirestore({
+    required String userId,
     required String providerId,
     required String carSize,
-    required String malfunctionCause,
-    required String loadingLocation,
-    required String destination,
+    required String carProblem,
+    required String placeOfLoading1,
+    required String placeOfLoading2,
+    required String placeOfLoading3,
+    required String placeToGo1,
+    required String placeToGo2,
+    required String placeToGo3,
   }) async {
-    final requestId =
-        FirebaseFirestore.instance.collection('requests').doc().id;
+    try {
+      // Reference to the Firestore collection
+      CollectionReference orders = FirebaseFirestore.instance.collection('requests');
 
-    await FirebaseFirestore.instance.collection('requests').doc(requestId).set({
-      'requestId': requestId,
-      'clientId': clientId,
-      'providerId': providerId,
-      'carSize': carSize,
-      'malfunctionCause': malfunctionCause,
-      'loadingLocation': loadingLocation,
-      'destination': destination,
-      'status': 'Pending',
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+      // Create a new document with an empty data object to get the auto-generated ID
+      DocumentReference docRef = orders.doc(); // Creates a document with an auto-generated ID
 
-    // Send a notification to the provider
-    await FirebaseFirestore.instance.collection('notifications').add({
-      'userId': providerId,
-      'type': 'new_request',
-      'message': 'You have a new request from a client.',
-      'timestamp': FieldValue.serverTimestamp(),
-      'read': false,
-    });
+      // Get the auto-generated document ID
+      String documentId = docRef.id;
+
+      // Add data to the document, including the document ID
+      await docRef.set({
+        'id': documentId, // Include the document ID in the stored data
+        'userId': userId,
+        'providerId': providerId,
+        'carSize': carSize,
+        'carProblem': carProblem,
+        'placeOfLoading1': placeOfLoading1,
+        'placeOfLoading2': placeOfLoading2,
+        'placeOfLoading3': placeOfLoading3,
+        'placeToGo1': placeToGo1,
+        'placeToGo2': placeToGo2,
+        'placeToGo3': placeToGo3,
+        'hiddenByProvider': false,
+        'status': 'pending',
+        'timestamp': FieldValue.serverTimestamp(), // Add a timestamp
+      });
+
+      print('Order sent to Firestore successfully! Document ID: $documentId');
+    } catch (e) {
+      print('Error sending order to Firestore: $e');
+    }
   }
 }

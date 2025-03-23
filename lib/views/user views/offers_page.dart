@@ -18,7 +18,7 @@ class OffersPage extends StatelessWidget {
         title: Text('Offers'.tr),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: () {
               _controller.fetchOffers(); // Manually fetch offers
             },
@@ -34,44 +34,46 @@ class OffersPage extends StatelessWidget {
           itemCount: _controller.offers.length,
           itemBuilder: (context, index) {
             final offer = _controller.offers[index];
-            final formattedTime =
-                DateFormat('yyyy-MM-dd – HH:mm').format(offer.timeOfOffer);
+            // final formattedTime =
+            //     DateFormat('yyyy-MM-dd – HH:mm')
+            //         .format(DateTime.parse(offer.timeOfOffer.toString()));
 
-            return _buildOfferCard(offer, formattedTime);
+            return _buildOfferCard(offer);
           },
         );
       }),
     );
   }
 
-  Widget _buildOfferCard(ProviderOfferModel offer, String formattedTime) {
+  Widget _buildOfferCard(ProviderOfferModel offer ) {
     return IgnorePointer(
       ignoring: hasAcceptedOffer && offer.status != 'Accepted',
       child: Opacity(
         opacity: (hasAcceptedOffer && offer.status != 'Accepted') ? 0.5 : 1,
         child: Card(
-          margin: EdgeInsets.all(8),
+          margin: const EdgeInsets.all(8),
           elevation: 20,
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(offer.providerName,
+                const Text('اسامة ناصر',
+                    //offer.providerName?,
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Text('${offer.distance}' + 'km away'.tr,
-                    style: TextStyle(fontSize: 16)),
-                Text('${offer.price}' + 'SAR'.tr,
-                    style: TextStyle(fontSize: 16)),
-                Text(formattedTime,
-                    style: TextStyle(fontSize: 14, color: Colors.grey)),
-                SizedBox(height: 16),
+                const SizedBox(height: 8),
+                Text('${offer.distance}${'km away'.tr}',
+                    style: const TextStyle(fontSize: 16)),
+                Text('${offer.price}${'SAR'.tr}',
+                    style: const TextStyle(fontSize: 16)),
+                // Text(formattedTime,
+                //     style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                const SizedBox(height: 16),
                 if (offer.status == 'Accepted')
                   Text(
                     'Waiting for provider confirmation...'.tr,
-                    style: TextStyle(fontSize: 16, color: Colors.green),
+                    style: const TextStyle(fontSize: 16, color: Colors.green),
                   )
                 else
                   Row(
@@ -82,8 +84,11 @@ class OffersPage extends StatelessWidget {
                           Colors.green,
                           () =>
                               _controller.changeOfferStatus(offer, 'Accepted')),
+
                       _buildActionButton('Negotiate'.tr, Colors.orange,
                           () => _showNegotiationDialog(offer)),
+
+
                       _buildActionButton(
                           'Reject'.tr,
                           Colors.red,
@@ -103,7 +108,7 @@ class OffersPage extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(backgroundColor: color),
       onPressed: onPressed,
-      child: Text(text, style: TextStyle(color: Colors.white)),
+      child: Text(text, style: const TextStyle(color: Colors.white)),
     );
   }
 
@@ -113,18 +118,18 @@ class OffersPage extends StatelessWidget {
     showDialog(
       context: Get.context!, // Use Get.context instead of passing context
       builder: (context) => AlertDialog(
-        title: Text('Negotiate Price'),
+        title:Text('Negotiate Price'.tr),
         content: TextField(
           controller: _controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: 'New Price (SAR)',
-            hintText: 'Enter counter offer',
+            labelText: 'New Price (SAR)'.tr,
+            hintText: 'Enter counter offer'.tr,
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+              onPressed: () => Navigator.pop(context), child:  Text('Cancel'.tr)),
           TextButton(
               onPressed: () {
                 if (_controller.text.isNotEmpty) {
@@ -133,7 +138,7 @@ class OffersPage extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
-              child: Text('Submit')),
+              child:  Text('Submit'.tr)),
         ],
       ),
     );

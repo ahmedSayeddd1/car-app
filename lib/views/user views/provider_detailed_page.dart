@@ -1,4 +1,3 @@
-import 'package:first_project/controllers/client_controller.dart';
 import 'package:first_project/models/KSA_places.dart';
 import 'package:first_project/models/provider_model.dart';
 import 'package:first_project/values/colors.dart';
@@ -7,7 +6,6 @@ import 'package:get/get.dart';
 
 class ProviderDetailsPage extends StatelessWidget {
   final Provider provider;
-  final ClientController _controller = Get.put(ClientController());
 
   ProviderDetailsPage({required this.provider});
 
@@ -321,6 +319,38 @@ class ProviderDetailsPage extends StatelessWidget {
             );
           }).toList(),
         ));
+  }
+
+  Widget _buildStaticLocationText() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'العبور',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStaticDestinationText() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'مدينة نصر',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
   }
 
   Widget _buildSubmitButton() {

@@ -27,16 +27,16 @@ class NotificationModel {
 
   factory NotificationModel.fromMap(Map<String, dynamic> data) {
     return NotificationModel(
-      id: data['id'],
-      type: data['type'],
-      orderId: data['orderId'],
-      userId: data['userId'],
-      providerId: data['providerId'],
+      id: data['id']??"",
+      type: data['type']??"",
+      orderId: data['orderId']??"",
+      userId: data['userId']??"",
+      providerId: data['providerId']??"",
       timestamp: (data['timestamp'] as Timestamp).toDate(),
       read: data['read'] ?? false,
-      carSize: data['carSize'],
-      placeOfLoading: data['placeOfLoading'],
-      destination: data['destination'],
+      carSize: data['carSize']??"",
+      placeOfLoading: data['placeOfLoading']??"",
+      destination: data['destination']??"",
     );
   }
 }
